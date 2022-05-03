@@ -14,24 +14,8 @@ activity_list = ["오늘의운세", "[사냥]", "[요리]", "[로또뽑기]", "[
 
 def main():
     # get all spreadsheet data from google spreadsheet
-    google_api = GoogleAPI()
     data_process_service = DataProcessingService()
-
-    hunting_raw_data = google_api.get_all_data_from_sheet("server_burangza", "사냥v2")
-    hunting_data = data_process_service.classify_by_grade(hunting_raw_data)
-    cooking_raw_data = google_api.get_all_data_from_sheet("server_burangza", "요리")
-    cooking_data = data_process_service.get_cooking_list(cooking_raw_data)
-    user_raw_data = google_api.get_all_data_from_sheet("플레이어", "test")
-    user_data = data_process_service.get_user_data_dict(user_raw_data)
-    comment_raw_data = google_api.get_all_data_from_sheet("server_burangza", "활동 랜덤 스크립트")
-    comment_data = data_process_service.get_comment_list(comment_raw_data)
-
-    sheet_data = dict(
-        사냥=hunting_data,
-        요리=cooking_data,
-        플레이어=user_data,
-        코멘트=comment_data
-    )
+    sheet_data = data_process_service.generate_sheet_data()
 
     print("data is ready")
     time.sleep(10)

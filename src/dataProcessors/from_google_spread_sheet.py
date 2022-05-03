@@ -38,6 +38,29 @@ class GoogleAPI:
 
 
 class DataProcessingService:
+    def generate_sheet_data(self):
+        google_api = GoogleAPI()
+
+        hunting_raw_data = google_api.get_all_data_from_sheet("bot-data", "사냥")
+        hunting_data = self.classify_by_grade(hunting_raw_data)
+        fishing_raw_data = google_api.get_all_data_from_sheet("bot-data", "낚시")
+        fishing_data = self.classify_by_grade(fishing_raw_data)
+        cooking_raw_data = google_api.get_all_data_from_sheet("bot-data", "요리")
+        cooking_data = self.get_cooking_list(cooking_raw_data)
+        user_raw_data = google_api.get_all_data_from_sheet("플레이어", "test")
+        user_data = self.get_user_data_dict(user_raw_data)
+        comment_raw_data = google_api.get_all_data_from_sheet("bot-data", "활동 랜덤 스크립트")
+        comment_data = self.get_comment_list(comment_raw_data)
+
+        sheet_data = dict(
+            사냥=hunting_data,
+            낚시=fishing_data,
+            요리=cooking_data,
+            플레이어=user_data,
+            코멘트=comment_data
+        )
+        return sheet_data
+
     def classify_by_grade(self, dataframe):
         classified_data = defaultdict(list)
 
