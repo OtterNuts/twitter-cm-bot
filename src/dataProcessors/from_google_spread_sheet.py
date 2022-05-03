@@ -42,56 +42,15 @@ class DataProcessingService:
         classified_data = defaultdict(list)
 
         for data in dataframe.values:
-            if data[1] == "전설":
-                classified_data["전설"].append(
-                    Monster(
-                        name=data[0],
-                        grade=data[1],
-                        image=data[2],
-                        description=data[3],
-                        recipe=data[4]
-                    )
+            classified_data[data[1]].append(
+                Monster(
+                    name=data[0],
+                    grade=data[1],
+                    image=data[2],
+                    description=data[3],
+                    recipe=data[4]
                 )
-            if data[1] == "초희귀":
-                classified_data["초희귀"].append(
-                    Monster(
-                        name=data[0],
-                        grade=data[1],
-                        image=data[2],
-                        description=data[3],
-                        recipe=data[4]
-                    )
-                )
-            if data[1] == "희귀":
-                classified_data["희귀"].append(
-                    Monster(
-                        name=data[0],
-                        grade=data[1],
-                        image=data[2],
-                        description=data[3],
-                        recipe=data[4]
-                    )
-                )
-            if data[1] == "평범":
-                classified_data["평범"].append(
-                    Monster(
-                        name=data[0],
-                        grade=data[1],
-                        image=data[2],
-                        description=data[3],
-                        recipe=data[4]
-                    )
-                )
-            if data[1] == "꽝":
-                classified_data["꽝"].append(
-                    Monster(
-                        name=data[0],
-                        grade=data[1],
-                        image=data[2],
-                        description=data[3],
-                        recipe=data[4]
-                    )
-                )
+            )
         return classified_data
 
     def get_cooking_list(self, dataframe):
