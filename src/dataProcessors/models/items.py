@@ -14,4 +14,4 @@ class Monster:
 class Cooking:
     name: str
     description: str
-    ingredient: str
+    ingredients: str
