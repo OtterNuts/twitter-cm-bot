@@ -1,6 +1,7 @@
 from random import randint
 from src.dataProcessors.models.items import Monster
 
+
 class Activities:
     def todays_fortune(self):
         value = randint(0, 1000)
@@ -20,40 +21,43 @@ class Activities:
         else:
             return "[대길] 축하합니다!! 로또보단 낮지만 어쨌든 엄청난 확률을 손에 쥐셨습니다!"
 
+    def generate_comment(self, activity_comment: str, grade: str, monster: Monster):
+        result_comment = activity_comment + "\n . \n . \n . \n" + grade + monster.name + "\n" + \
+        monster.description + "\n\n추천 레시피: " + monster.recipe
+
+        return result_comment
+
     def activity_result(self, activity_data, comment_list):
         image_name = ""
+        activity_comment = comment_list[randint(0, len(comment_list) - 1)]
 
         # 전설 1% 초희귀 10% 희귀 30% 평범 40% 꽝 20%
         value = randint(1, 101)
-
         if value < 20:
-            result_list = activity_data["꽝"]
-            result = result_list[randint(0, len(result_list) - 1)]
-            comment = comment_list[randint(0, len(comment_list) - 1)] + "\n . \n . \n . \n" + result.description + "\n[꽝]"
+            monster_list = activity_data["꽝"]
+            result_monster = monster_list[randint(0, len(monster_list) - 1)]
+            comment = self.generate_comment(activity_comment, "꽝", result_monster)
 
         elif value < 60:
-            result_list = activity_data["평범"]
-            result = result_list[randint(0, len(result_list) - 1)]
-            comment = comment_list[randint(0, len(comment_list) - 1)] + "\n . \n . \n . \n[평범]" + result.name + "\n" + \
-                        result.description + "\n\n추천 레시피: " + result.recipe
+            monster_list = activity_data["평범"]
+            result_monster = monster_list[randint(0, len(monster_list) - 1)]
+            comment = self.generate_comment(activity_comment, "평범", result_monster)
 
         elif value < 90:
-            result_list = activity_data["희귀"]
-            result = result_list[randint(0, len(result_list) - 1)]
-            comment = comment_list[randint(0, len(comment_list) - 1)] + "\n . \n . \n . \n[희귀]" + result.name + "\n" + \
-                        result.description + "\n\n추천 레시피: " + result.recipe
+            monster_list = activity_data["희귀"]
+            result_monster = monster_list[randint(0, len(monster_list) - 1)]
+            comment = self.generate_comment(activity_comment, "희귀", result_monster)
 
         elif value < 99:
-            result_list = activity_data["초희귀"]
-            result = result_list[randint(0, len(result_list) - 1)]
-            comment = comment_list[randint(0, len(comment_list) - 1)] + "\n . \n . \n . \n[초희귀]" + result.name + "\n" + \
-                      result.description + "\n\n추천 레시피: " + result.recipe
+            monster_list = activity_data["초희귀"]
+            result_monster = monster_list[randint(0, len(monster_list) - 1)]
+            comment = self.generate_comment(activity_comment, "초희귀", result_monster)
 
         else:
-            result_list = activity_data["전설"]
-            result = result_list[randint(0, len(result_list) - 1)]
-            comment = comment_list[randint(0, len(comment_list) - 1)] + "\n . \n . \n . \n[전설]" + result.name + "\n" + \
-                      result.description + "\n\n추천 레시피: " + result.recipe
-            image_name = result.image
+            monster_list = activity_data["전설"]
+            result_monster = monster_list[randint(0, len(monster_list) - 1)]
+            comment = self.generate_comment(activity_comment, "희귀", result_monster)
+            image_name = result_monster.image
 
         return {"image_name": image_name, "comment": comment}
+
