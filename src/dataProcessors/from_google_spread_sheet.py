@@ -6,7 +6,6 @@ from src.dataProcessors.models.user import User
 from src.auth.google_drive import GoogleClient
 
 logger = logging.Logger
-grades = ["전설", "초희귀", "희귀", "평범", "꽝"]
 
 class GoogleAPI:
     def __init__(self):
@@ -23,8 +22,8 @@ class GoogleAPI:
 
     def update_user_data(self, spread_name, sheet_name, user_data_dict):
         user_data_list = []
-        for _, data in user_data_dict.items():
-            object_dict = data.__dict__
+        for _, user_object in user_data_dict.items():
+            object_dict = user_object.__dict__
             user_data = []
             for _, data in object_dict.items():
                 user_data.append(data)
@@ -64,14 +63,14 @@ class DataProcessingService:
     def classify_by_grade(self, dataframe):
         classified_data = defaultdict(list)
 
-        for data in dataframe.values:
-            classified_data[data[1]].append(
+        for monster_data in dataframe.values:
+            classified_data[monster_data[1]].append(
                 Monster(
-                    name=data[0],
-                    grade=data[1],
-                    image=data[2],
-                    description=data[3],
-                    recipe=data[4]
+                    name=monster_data[0],
+                    grade=monster_data[1],
+                    image=monster_data[2],
+                    description=monster_data[3],
+                    recipe=monster_data[4]
                 )
             )
         return classified_data
