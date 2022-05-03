@@ -59,7 +59,7 @@ class DataProcessingService:
             cooking_list.append(Cooking(
                 name=data[0],
                 description=data[1],
-                ingredient=data[2]
+                ingredients=data[2]
             ))
         return cooking_list
 
@@ -86,16 +86,16 @@ class DataProcessingService:
         comment_dict = {
             "사냥 멘트": [],
             "낚시 멘트": [],
-            "평가": [],
+            "요리 평가": [],
         }
         for data in dataframe.values:
             comment_dict["사냥 멘트"].append(data[0])
             comment_dict["낚시 멘트"].append(data[1])
-            comment_dict["평가"].append(data[2])
+            comment_dict["요리 평가"].append(data[2])
 
         comment_dict["사냥 멘트"] = list(filter(None, comment_dict["사냥 멘트"]))
         comment_dict["낚시 멘트"] = list(filter(None, comment_dict["낚시 멘트"]))
-        comment_dict["평가"] = list(filter(None, comment_dict["평가"]))
+        comment_dict["요리 평가"] = list(filter(None, comment_dict["평가"]))
 
         return comment_dict
 
