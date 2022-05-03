@@ -27,43 +27,31 @@ class Activities:
         result_comment = comment_list[randint(0, len(comment_list) - 1)]
         return "[" + dish.name + "]\n들어간 재료: " + dish.ingredients + "\n" + dish.description + "\n\n한줄평: " + result_comment
 
-    def generate_comment(self, activity_comment: str, grade: str, monster: Monster):
-        result_comment = activity_comment + "\n . \n . \n . \n" + grade + monster.name + "\n" + \
+    def generate_comment(self, activity_comment: str, monster: Monster):
+        result_comment = activity_comment + "\n . \n . \n . \n" + monster.grade + monster.name + "\n" + \
         monster.description + "\n\n추천 레시피: " + monster.recipe
 
         return result_comment
 
     def activity_result(self, activity_data, comment_list):
-        image_name = ""
         activity_comment = comment_list[randint(0, len(comment_list) - 1)]
 
         # 전설 1% 초희귀 10% 희귀 30% 평범 40% 꽝 20%
         value = randint(1, 101)
         if value < 20:
             monster_list = activity_data["꽝"]
-            result_monster = monster_list[randint(0, len(monster_list) - 1)]
-            comment = self.generate_comment(activity_comment, "꽝", result_monster)
-
         elif value < 60:
             monster_list = activity_data["평범"]
-            result_monster = monster_list[randint(0, len(monster_list) - 1)]
-            comment = self.generate_comment(activity_comment, "평범", result_monster)
-
         elif value < 90:
             monster_list = activity_data["희귀"]
-            result_monster = monster_list[randint(0, len(monster_list) - 1)]
-            comment = self.generate_comment(activity_comment, "희귀", result_monster)
-
         elif value < 99:
             monster_list = activity_data["초희귀"]
-            result_monster = monster_list[randint(0, len(monster_list) - 1)]
-            comment = self.generate_comment(activity_comment, "초희귀", result_monster)
-
         else:
             monster_list = activity_data["전설"]
-            result_monster = monster_list[randint(0, len(monster_list) - 1)]
-            comment = self.generate_comment(activity_comment, "희귀", result_monster)
-            image_name = result_monster.image
+
+        result_monster = monster_list[randint(0, len(monster_list) - 1)]
+        comment = self.generate_comment(activity_comment, result_monster)
+        image_name = result_monster.image
 
         return {"image_name": image_name, "comment": comment}
 
