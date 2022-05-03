@@ -21,6 +21,12 @@ class Activities:
         else:
             return "[대길] 축하합니다!! 로또보단 낮지만 어쨌든 엄청난 확률을 손에 쥐셨습니다!"
 
+    def cooking(self, cooking_data, comment_list):
+        value = randint(0, len(cooking_data) - 1)
+        dish = cooking_data[value]
+        result_comment = comment_list[randint(0, len(comment_list) - 1)]
+        return "[" + dish.name + "]\n들어간 재료: " + dish.ingredients + "\n" + dish.description + "\n\n한줄평: " + result_comment
+
     def generate_comment(self, activity_comment: str, grade: str, monster: Monster):
         result_comment = activity_comment + "\n . \n . \n . \n" + grade + monster.name + "\n" + \
         monster.description + "\n\n추천 레시피: " + monster.recipe

@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 firework_image = ['firework1.jpg', 'firework2.jpg', 'firework3.jpg', 'firework4.jpg', 'firework5.jpg']
 REQUIRED_STAMINA = 20
+REQUIRED_BITE = 1
 
 class TweetBot:
     def __init__(self):
@@ -82,6 +83,25 @@ class TweetBot:
             reply_image = self.image_path + "lottery.jpeg"
             reply_comment = "@%s" % user_id + " " + number_script
 
+        elif task_name == "[요리]":
+            print("요리 시작")
+            reply_comment = "@%s" % tweet.user.screen_name + self.activities.cooking(sheet_data["요리"], sheet_data["코멘트"]["요리 평가"])
+
+        elif task_name == "[낚시]":
+            print("낚시 시작")
+            user_bites = sheet_data["플레이어"][user_name].떡밥
+            fishing_comments = sheet_data["코멘트"]["낚시 멘트"]
+            if user_bites >= REQUIRED_BITE:
+                fishing_result = self.activities.activity_result(sheet_data["낚시"], fishing_comments)
+                reply_image = fishing_result["image_name"]
+                reply_comment = "@%s" % user_id + fishing_result["comment"]
+
+                sheet_data["플레이어"][user_name].떡밥 = user_bites - REQUIRED_BITE
+                self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+            else:
+                reply_comment = "@%s" % user_id + "떡밥이 부족하거나 없는 유저명입니다. 상점에서 떡밥 구입하세요."
+            time.sleep(2)
+
         elif task_name == "[사냥]":
             print("사냥 시작")
             user_stamina = sheet_data["플레이어"][user_name].스테미나
@@ -91,7 +111,7 @@ class TweetBot:
                 reply_image = hunt_result["image_name"]
                 reply_comment = "@%s" % user_id + hunt_result["comment"]
 
-                sheet_data["플레이어"][user_name].스테미나 = REQUIRED_STAMINA - 20
+                sheet_data["플레이어"][user_name].스테미나 = user_stamina - REQUIRED_STAMINA
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
             else:
                 reply_comment = "@%s" % user_id + "스테미나가 부족하거나 없는 유저명입니다. 상점에서 회복약을 구입하거나 스테미나가 회복될 때까지 기다려주세요."
