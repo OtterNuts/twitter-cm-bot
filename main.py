@@ -9,16 +9,13 @@ from src.tweetBot.update_tweet import TweetBot
 logger = logging.Logger
 
 #activity_list = ["오늘의운세", "[낚시]", "[사냥]", "[요리]", "[장비뽑기]", "[tmi보기]", "[하급장비판매]", "[일괄판매]", "[중급장비판매]", "[할로윈요리]"]
-activity_list = ["오늘의운세", "[사냥]", "[요리]", "[로또뽑기]", "[불꽃놀이]"]
+activity_list = ["오늘의운세", "[사냥]", "[요리]", "[낚시]", "[장비뽑기]", "[로또뽑기]", "[불꽃놀이]"]
 
 
 def main():
     # get all spreadsheet data from google spreadsheet
-    data_process_service = DataProcessingService()
-    sheet_data = data_process_service.generate_sheet_data()
-
+    sheet_data = DataProcessingService().generate_sheet_data()
     print("data is ready")
-    time.sleep(10)
 
     # operate tweet bot
     twitter_client = TwitterClient().tweeter_auth()

@@ -1,7 +1,7 @@
 import logging
 import pandas
 from collections import defaultdict
-from src.dataProcessors.models.items import Monster, Cooking
+from src.dataProcessors.models.items import Monster, Cooking, Equipment
 from src.dataProcessors.models.user import User
 from src.auth.google_drive import GoogleClient
 
@@ -40,10 +40,12 @@ class DataProcessingService:
     def generate_sheet_data(self):
         google_api = GoogleAPI()
 
+        equipment_raw_data = google_api.get_all_data_from_sheet("bot-data", "장비뽑기")
+        equipment_data = self.classify_equipment_by_grade(equipment_raw_data)
         hunting_raw_data = google_api.get_all_data_from_sheet("bot-data", "사냥")
-        hunting_data = self.classify_by_grade(hunting_raw_data)
+        hunting_data = self.classify_monster_by_grade(hunting_raw_data)
         fishing_raw_data = google_api.get_all_data_from_sheet("bot-data", "낚시")
-        fishing_data = self.classify_by_grade(fishing_raw_data)
+        fishing_data = self.classify_monster_by_grade(fishing_raw_data)
         cooking_raw_data = google_api.get_all_data_from_sheet("bot-data", "요리")
         cooking_data = self.get_cooking_list(cooking_raw_data)
         user_raw_data = google_api.get_all_data_from_sheet("플레이어", "test")
@@ -52,6 +54,7 @@ class DataProcessingService:
         comment_data = self.get_comment_list(comment_raw_data)
 
         sheet_data = dict(
+            장비=equipment_data,
             사냥=hunting_data,
             낚시=fishing_data,
             요리=cooking_data,
@@ -60,7 +63,21 @@ class DataProcessingService:
         )
         return sheet_data
 
-    def classify_by_grade(self, dataframe):
+    def classify_equipment_by_grade(self, dataframe):
+        classified_data = defaultdict(list)
+
+        for equipment_data in dataframe.values:
+            classified_data[equipment_data[1]].append(
+                Equipment(
+                    name=equipment_data[0],
+                    grade=equipment_data[1],
+                    image=equipment_data[2],
+                    description=equipment_data[3],
+                )
+            )
+        return classified_data
+
+    def classify_monster_by_grade(self, dataframe):
         classified_data = defaultdict(list)
 
         for monster_data in dataframe.values:

@@ -1,6 +1,6 @@
 from random import randint
-from src.dataProcessors.models.items import Monster
-
+from src.dataProcessors.models.items import Monster, Equipment
+from collections import defaultdict
 
 class Activities:
     def todays_fortune(self):
@@ -53,4 +53,37 @@ class Activities:
         image_name = result_monster.image
 
         return {"image_name": image_name, "comment": comment}
+
+    def gotcha_result(self, equipment_data):
+        image_name = "normal.png"
+        result = defaultdict(list)
+
+        for i in range(0, 10):
+            value = randint(1, 100)
+            if value == 100:
+                equip_grade = "S급"
+                equipment_list = equipment_data[equip_grade]
+                image_name = "special.png"
+            elif value > 89:
+                equip_grade = "A급"
+                equipment_list = equipment_data[equip_grade]
+                image_name = "special.png"
+            elif value > 53:
+                equip_grade = "B급"
+                equipment_list = equipment_data[equip_grade]
+            else:
+                equip_grade = "C급"
+                equipment_list = equipment_data[equip_grade]
+
+            equipment = equipment_list[randint(0,len(equipment_list) - 1)]
+            result[equip_grade].append(
+                Equipment(
+                    name=equipment.name,
+                    grade=equipment.grade,
+                    image=equipment.image,
+                    description=equipment.description,
+                )
+            )
+
+        return {"image_name": image_name, "equip_list": result}
 

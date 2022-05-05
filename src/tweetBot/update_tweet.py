@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 firework_image = ['firework1.jpg', 'firework2.jpg', 'firework3.jpg', 'firework4.jpg', 'firework5.jpg']
 REQUIRED_STAMINA = 20
 REQUIRED_BITE = 1
+REQUIRED_CRYSTAL = 1500
 
 class TweetBot:
     def __init__(self):
@@ -41,22 +42,30 @@ class TweetBot:
                 if task_name != "":
                     print(f"Answering to {tweet.user.name}")
                     print(tweet.id)
-                    reply = self.generate_reply(sheet_data, task_name, tweet)
-                    print(reply)
 
-                    if reply["reply_image"]:
-                        api.update_status_with_media(
-                            filename=self.image_path + reply["reply_image"],
-                            status=reply["reply_comment"],
-                            in_reply_to_status_id=tweet.id,
-                        )
+                    if task_name == "[장비뽑기]":
+                        replies = self.generate_gotcha_comment(sheet_data, tweet)
                     else:
-                        api.update_status(
-                            status=reply["reply_comment"],
-                            in_reply_to_status_id=tweet.id,
-                        )
+                        replies = self.generate_reply(sheet_data, task_name, tweet)
+
+                    for reply in replies:
+                        if reply["reply_image"]:
+                            api.update_status_with_media(
+                                filename=self.image_path + reply["reply_image"],
+                                status=reply["reply_comment"],
+                                in_reply_to_status_id=tweet.id,
+                            )
+                        else:
+                            api.update_status(
+                                status=reply["reply_comment"],
+                                in_reply_to_status_id=tweet.id,
+                            )
 
             except tweepy.errors.TweepyException as err:
+                api.update_status(
+                    status="@%s" % tweet.user.id + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다.",
+                    in_reply_to_status_id=tweet.id,
+                )
                 print(err, "에러가 발생했습니다. 오류 메시지를 확인하세요.")
                 RWDataFromTextFile().update_file(latest_id)
 
@@ -101,7 +110,6 @@ class TweetBot:
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
             else:
                 reply_comment = "@%s" % user_id + "떡밥이 부족하거나 없는 유저명입니다. 상점에서 떡밥 구입하세요."
-            time.sleep(2)
 
         elif task_name == "[사냥]":
             print("사냥 시작")
@@ -116,12 +124,54 @@ class TweetBot:
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
             else:
                 reply_comment = "@%s" % user_id + "스테미나가 부족하거나 없는 유저명입니다. 상점에서 회복약을 구입하거나 스테미나가 회복될 때까지 기다려주세요."
-            time.sleep(2)
 
         else:
-            reply_comment = "@%s 오류입니다. 해당 트윗과 봇에 보낸 트윗을 캡쳐해서 총괄계 디엠으로 보내주세요." % user_id
+            reply_comment = "@%s" % user_id + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다."
 
-        return {"reply_image": reply_image, "reply_comment": reply_comment}
+        return [{"reply_image": reply_image, "reply_comment": reply_comment}]
 
+    def generate_gotcha_comment(self, sheet_data, tweet: Tweet):
+        gotcha_result = self.activities.gotcha_result(sheet_data["장비"])
+        user_id = tweet.user.id
+        user_name = tweet.user.name
+
+        print("가챠 시작")
+        user_crystal = sheet_data["플레이어"][user_name].크리스탈
+        if user_crystal >= REQUIRED_CRYSTAL:
+            replies = [{"reply_image": gotcha_result["image_name"], "reply_comment": "@%s" % user_id}]
+
+            normal_equips = ""
+            for c_equip in gotcha_result["equip_list"]["C급"]:
+                normal_equips += f"[{c_equip.grade}]{c_equip.name}: {c_equip.description}\n"
+            for b_equip in gotcha_result["equip_list"]["B급"]:
+                normal_equips += f"[{b_equip.grade}]{b_equip.name}: {b_equip.description}\n"
+            for a_equip in gotcha_result["equip_list"]["A급"]:
+                normal_equips += f"[{a_equip.grade}]{a_equip.name}: {a_equip.description}\n"
+
+            chunks = [normal_equips[i:i + 140].lstrip() for i in range(0, len(normal_equips), 140)]
+            for chunk in chunks:
+                replies.append({"reply_image": "", "reply_comment": chunk})
+
+            for s_equip in gotcha_result["equip_list"]["S급"]:
+                replies.append(
+                    {
+                        "reply_image": s_equip.image,
+                        "reply_comment": f"[{s_equip.grade}]{s_equip.name}: {s_equip.description}\n"
+                    }
+                )
+
+            num_c_equip = len(gotcha_result["equip_list"]["C급"])
+            num_b_equip = len(gotcha_result["equip_list"]["B급"])
+
+            sheet_data["플레이어"][user_name].크리스탈 -= REQUIRED_CRYSTAL
+            sheet_data["플레이어"][user_name].C급장비개수 += num_c_equip
+            sheet_data["플레이어"][user_name].B급장비개수 += num_b_equip
+            self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+
+        else:
+            reply_comment = "@%s" % user_id + "크리스탈 부족하거나 없는 유저명입니다. 상점에서 크리스탈을 구매해주세요."
+            replies = [{"reply_image": "", "reply_comment": reply_comment}]
+
+        return replies
 
 
