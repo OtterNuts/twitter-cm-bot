@@ -117,7 +117,7 @@ class DataProcessingService:
 
         comment_dict["사냥 멘트"] = list(filter(None, comment_dict["사냥 멘트"]))
         comment_dict["낚시 멘트"] = list(filter(None, comment_dict["낚시 멘트"]))
-        comment_dict["요리 평가"] = list(filter(None, comment_dict["평가"]))
+        comment_dict["요리 평가"] = list(filter(None, comment_dict["요리 평가"]))
 
         return comment_dict
 
