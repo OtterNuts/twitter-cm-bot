@@ -9,7 +9,7 @@ from src.tweetBot.update_tweet import TweetBot
 logger = logging.Logger
 
 #activity_list = ["오늘의운세", "[낚시]", "[사냥]", "[요리]", "[장비뽑기]", "[tmi보기]", "[하급장비판매]", "[일괄판매]", "[중급장비판매]", "[할로윈요리]"]
-activity_list = ["오늘의운세", "[사냥]", "[요리]", "[낚시]", "[장비뽑기]", "[로또뽑기]", "[불꽃놀이]"]
+activity_list = ["오늘의운세", "[사냥]", "[요리]", "[낚시]", "[장비뽑기]", "[로또뽑기]", "[불꽃놀이]", "[일괄판매]"]
 
 
 def main():

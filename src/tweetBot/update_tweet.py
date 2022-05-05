@@ -9,16 +9,16 @@ from src.tweetBot.activities import Activities
 
 logging.basicConfig(level=logging.INFO)
 
+BOT_ID = "@Serendity_Dice"
 firework_image = ['firework1.jpg', 'firework2.jpg', 'firework3.jpg', 'firework4.jpg', 'firework5.jpg']
 REQUIRED_STAMINA = 20
 REQUIRED_BITE = 1
-REQUIRED_CRYSTAL = 1500
+REQUIRED_CRYSTAL = 3000
 
 class TweetBot:
     def __init__(self):
         self.google_api = GoogleAPI()
         self.activities = Activities()
-        self.bot_id = "@Serendity_Dice"
         self.image_path = "src/tweetBot/images/"
 
     def check_mentions(self, api, keywords, since_id, sheet_data):
@@ -82,7 +82,7 @@ class TweetBot:
 
         elif task_name == "[불꽃놀이]":
             value = randint(0, 4)
-            text = tweet.text.replace(self.bot_id, "")
+            text = tweet.text.replace(BOT_ID, "")
             text = text.replace("[불꽃놀이]", "")
             reply_image = self.image_path + firework_image[value]
             reply_comment = user_name + "(이)가 불꽃을 쏘아올립니다.\n\n<<" + text + " >>"
@@ -125,6 +125,20 @@ class TweetBot:
             else:
                 reply_comment = "@%s" % user_id + "스테미나가 부족하거나 없는 유저명입니다. 상점에서 회복약을 구입하거나 스테미나가 회복될 때까지 기다려주세요."
 
+        elif task_name == "[일괄판매]":
+            print("일괄판매 시작")
+            num_c_equip = sheet_data["플레이어"][user_name].C급장비개수
+            num_b_equip = sheet_data["플레이어"][user_name].B급장비개수
+            if int(num_b_equip) + int(num_c_equip) == 0:
+                reply_comment = "장비가 없습니다. 인벤토리를 확인해주세요."
+            else:
+                sell_total = 5000 * int(num_b_equip) + 1000 * int(num_c_equip)
+                sheet_data["플레이어"][user_name].골드 += sell_total
+                sheet_data["플레이어"][user_name].C급장비개수 = 0
+                sheet_data["플레이어"][user_name].B급장비개수 = 0
+                self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+                reply_comment = "@%s" % user_id + f"[장비판매]\nB급장비개수: {num_b_equip}\nC급장비개수: {num_c_equip}\n총가격: {str(sell_total)}"
+
         else:
             reply_comment = "@%s" % user_id + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다."
 
@@ -132,7 +146,7 @@ class TweetBot:
 
     def generate_gotcha_comment(self, sheet_data, tweet: Tweet):
         gotcha_result = self.activities.gotcha_result(sheet_data["장비"])
-        user_id = tweet.user.id
+        user_id = tweet.user.screen_name
         user_name = tweet.user.name
 
         print("가챠 시작")
@@ -150,13 +164,13 @@ class TweetBot:
 
             chunks = [normal_equips[i:i + 140].lstrip() for i in range(0, len(normal_equips), 140)]
             for chunk in chunks:
-                replies.append({"reply_image": "", "reply_comment": chunk})
+                replies.append({"reply_image": "", "reply_comment": "@%s" % user_id + chunk})
 
             for s_equip in gotcha_result["equip_list"]["S급"]:
                 replies.append(
                     {
                         "reply_image": s_equip.image,
-                        "reply_comment": f"[{s_equip.grade}]{s_equip.name}: {s_equip.description}\n"
+                        "reply_comment": "@%s" % user_id + f"[{s_equip.grade}]{s_equip.name}: {s_equip.description}\n"
                     }
                 )
 

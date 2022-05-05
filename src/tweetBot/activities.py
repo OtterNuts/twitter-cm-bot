@@ -25,10 +25,12 @@ class Activities:
         value = randint(0, len(cooking_data) - 1)
         dish = cooking_data[value]
         result_comment = comment_list[randint(0, len(comment_list) - 1)]
-        return f"[{dish.name}\n 들어간 재료: {dish.ingredients}\n {dish.description}\n\n한줄평: {result_comment}"
+        return f"[{dish.name}]\n들어간 재료: {dish.ingredients}\n{dish.description}\n\n한줄평: {result_comment}"
 
     def generate_comment(self, activity_comment: str, monster: Monster):
-        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.grade}]{monster.name}\n{monster.description}\n\n추천 레시피: {monster.recipe}"
+        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.grade}]{monster.name}\n{monster.description}\n\n"
+        if monster.recipe:
+            result_comment += f"추천 레시피: {monster.recipe}"
 
         return result_comment
 
