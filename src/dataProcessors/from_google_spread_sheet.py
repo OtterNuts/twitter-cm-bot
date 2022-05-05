@@ -35,6 +35,12 @@ class GoogleAPI:
         sheet = google_sheet.worksheet(sheet_name)
         sheet.update("A2", user_data_dataframe.values.tolist())
 
+    def update_user_sheet_data_from_google(self, sheet_data: dict):
+        user_raw_data = self.get_all_data_from_sheet("플레이어", "test")
+        user_data = DataProcessingService().get_user_data_dict(user_raw_data)
+
+        sheet_data.update({"플레이어": user_data})
+
 
 class DataProcessingService:
     def generate_sheet_data(self):

@@ -31,35 +31,49 @@ class TweetBot:
             received_tweets.append(new_tweet)
 
         for tweet in reversed(received_tweets):
+            self.google_api.update_user_sheet_data_from_google(sheet_data)
             try:
                 latest_id = tweet.id
                 user_id = tweet.user.screen_name
+                user_list = sheet_data["플레이어"].keys()
                 task_name = ""
                 for keyword in keywords:
                     if keyword in tweet.text.lower():
                         task_name = keyword
 
-                if task_name != "":
-                    print(f"Answering to {tweet.user.name}")
-                    print(tweet.id)
+                if tweet.user.name not in user_list:
+                    api.update_status(
+                        status="@%s " % user_id + "존재하지 않는 플레이어입니다. 유저이름을 확인해주세요.",
+                        in_reply_to_status_id=tweet.id,
+                    )
+                    continue
 
-                    if task_name == "[장비뽑기]":
-                        replies = self.generate_gotcha_comment(sheet_data, tweet)
+                if task_name == "":
+                    api.update_status(
+                        status="@%s" % user_id + "존재하지 않는 명령어 입니다. 명령어를 확인해주세요.",
+                        in_reply_to_status_id=tweet.id,
+                    )
+                    continue
+
+                print(f"Answering to {tweet.user.name}")
+                print(tweet.id)
+                if task_name == "[장비뽑기]":
+                    replies = self.generate_gotcha_comment(sheet_data, tweet)
+                else:
+                    replies = self.generate_reply(sheet_data, task_name, tweet)
+
+                for reply in replies:
+                    if reply["reply_image"]:
+                        api.update_status_with_media(
+                            filename=self.image_path + reply["reply_image"],
+                            status=reply["reply_comment"],
+                            in_reply_to_status_id=tweet.id,
+                        )
                     else:
-                        replies = self.generate_reply(sheet_data, task_name, tweet)
-
-                    for reply in replies:
-                        if reply["reply_image"]:
-                            api.update_status_with_media(
-                                filename=self.image_path + reply["reply_image"],
-                                status=reply["reply_comment"],
-                                in_reply_to_status_id=tweet.id,
-                            )
-                        else:
-                            api.update_status(
-                                status=reply["reply_comment"],
-                                in_reply_to_status_id=tweet.id,
-                            )
+                        api.update_status(
+                            status=reply["reply_comment"],
+                            in_reply_to_status_id=tweet.id,
+                        )
 
             except tweepy.errors.TweepyException as err:
                 api.update_status(
@@ -84,13 +98,13 @@ class TweetBot:
             value = randint(0, 4)
             text = tweet.text.replace(BOT_ID, "")
             text = text.replace("[불꽃놀이]", "")
-            reply_image = self.image_path + firework_image[value]
+            reply_image = firework_image[value]
             reply_comment = user_name + "(이)가 불꽃을 쏘아올립니다.\n\n<<" + text + " >>"
 
         elif task_name == "[로또뽑기]":
             randoms = sample(range(1, 46), 10)
             number_script = ', '.join(str(random) for random in randoms)
-            reply_image = self.image_path + "lottery.jpeg"
+            reply_image = "lottery.png"
             reply_comment = "@%s" % user_id + " " + number_script
 
         elif task_name == "[요리]":
@@ -164,7 +178,7 @@ class TweetBot:
 
             chunks = [normal_equips[i:i + 140].lstrip() for i in range(0, len(normal_equips), 140)]
             for chunk in chunks:
-                replies.append({"reply_image": "", "reply_comment": "@%s" % user_id + chunk})
+                replies.append({"reply_image": "", "reply_comment": "@%s " % user_id + chunk})
 
             for s_equip in gotcha_result["equip_list"]["S급"]:
                 replies.append(
@@ -187,5 +201,4 @@ class TweetBot:
             replies = [{"reply_image": "", "reply_comment": reply_comment}]
 
         return replies
-
 
