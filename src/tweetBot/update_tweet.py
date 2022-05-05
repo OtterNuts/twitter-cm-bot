@@ -42,16 +42,17 @@ class TweetBot:
                     print(f"Answering to {tweet.user.name}")
                     print(tweet.id)
                     reply = self.generate_reply(sheet_data, task_name, tweet)
+                    print(reply)
 
-                    if reply["reply_image"] is not None:
+                    if reply["reply_image"]:
                         api.update_status_with_media(
                             filename=self.image_path + reply["reply_image"],
-                            status="@%s" % user_id + reply["reply_comment"],
+                            status=reply["reply_comment"],
                             in_reply_to_status_id=tweet.id,
                         )
                     else:
                         api.update_status(
-                            status="@%s" % user_id + reply["reply_comment"],
+                            status=reply["reply_comment"],
                             in_reply_to_status_id=tweet.id,
                         )
 
