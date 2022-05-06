@@ -63,6 +63,13 @@ activity_list = ["오늘의운세", "[사냥]", "[요리]", "[낚시]", "[장비
         return [{"reply_image": reply_image, "reply_comment": reply_comment}]
 ```
 
+결과값은 reply_comment에 할당하고, 이미지를 추가하고 싶을 경우 reply_image에 이미지파일명을 확장자와 함께 기입하세요.
+
+```
+reply_comment = "@%s" % user_id + "봇이 명령어를 읽었습니다."
+reply_image = "photo.png"
+```
+
 ## 구글 스프레드 시트 관리
 예시용 구글 스프레드 시트: https://docs.google.com/spreadsheets/d/15HMKanZCVymE3XsnkhjgYZ_ddQTmfZRTrclwD3S9Cts/edit#gid=1956526250
 
@@ -82,4 +89,7 @@ example_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "시트이름"
 시트 데이터에 맞춰 src/dataProcessors/models/items에 dataclass를 추가하고 데이터를 가공할 함수를 생성하세요.
 raw_data를 가공하여 sheet_data에 넘기세요.
 
+
+## 외부 참고 링크
+https://velog.io/@ebecathouse
 
