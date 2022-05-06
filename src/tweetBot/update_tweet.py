@@ -9,8 +9,6 @@ from src.tweetBot.activities import Activities
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_ID = "@Serendity_Dice"
-firework_image = ['firework1.jpg', 'firework2.jpg', 'firework3.jpg', 'firework4.jpg', 'firework5.jpg']
 REQUIRED_STAMINA = 20
 REQUIRED_BITE = 1
 REQUIRED_CRYSTAL = 3000
@@ -93,13 +91,6 @@ class TweetBot:
 
         if task_name == "오늘의운세":
             reply_comment = "@%s" % user_id + " " + self.activities.todays_fortune()
-
-        elif task_name == "[불꽃놀이]":
-            value = randint(0, 4)
-            text = tweet.text.replace(BOT_ID, "")
-            text = text.replace("[불꽃놀이]", "")
-            reply_image = firework_image[value]
-            reply_comment = user_name + "(이)가 불꽃을 쏘아올립니다.\n\n<<" + text + " >>"
 
         elif task_name == "[로또뽑기]":
             randoms = sample(range(1, 46), 10)
