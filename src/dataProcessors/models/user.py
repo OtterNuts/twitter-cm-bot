@@ -3,7 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class User:
-    이름: str
+    id: str
+    닉네임: str
     크리스탈: int
     스테미나: int
     떡밥: int
