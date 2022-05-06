@@ -113,45 +113,47 @@ class TweetBot:
 
         elif task_name == "[낚시]":
             print("낚시 시작")
-            user_bites = sheet_data["플레이어"][user_name].떡밥
+            user_bites = sheet_data["플레이어"][user_id].떡밥
             fishing_comments = sheet_data["코멘트"]["낚시 멘트"]
             if user_bites >= REQUIRED_BITE:
                 fishing_result = self.activities.activity_result(sheet_data["낚시"], fishing_comments)
                 reply_image = fishing_result["image_name"]
                 reply_comment = "@%s" % user_id + fishing_result["comment"]
 
-                sheet_data["플레이어"][user_name].떡밥 = user_bites - REQUIRED_BITE
+                sheet_data["플레이어"][user_id].떡밥 = user_bites - REQUIRED_BITE
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
             else:
                 reply_comment = "@%s" % user_id + "떡밥이 부족하거나 없는 유저명입니다. 상점에서 떡밥 구입하세요."
 
         elif task_name == "[사냥]":
             print("사냥 시작")
-            user_stamina = sheet_data["플레이어"][user_name].스테미나
+            user_stamina = sheet_data["플레이어"][user_id].스테미나
             hunting_comments = sheet_data["코멘트"]["사냥 멘트"]
             if user_stamina >= REQUIRED_STAMINA:
                 hunt_result = self.activities.activity_result(sheet_data["사냥"], hunting_comments)
                 reply_image = hunt_result["image_name"]
                 reply_comment = "@%s" % user_id + hunt_result["comment"]
 
-                sheet_data["플레이어"][user_name].스테미나 = user_stamina - REQUIRED_STAMINA
+                sheet_data["플레이어"][user_id].스테미나 = user_stamina - REQUIRED_STAMINA
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
             else:
                 reply_comment = "@%s" % user_id + "스테미나가 부족하거나 없는 유저명입니다. 상점에서 회복약을 구입하거나 스테미나가 회복될 때까지 기다려주세요."
 
         elif task_name == "[일괄판매]":
             print("일괄판매 시작")
-            num_c_equip = sheet_data["플레이어"][user_name].C급장비개수
-            num_b_equip = sheet_data["플레이어"][user_name].B급장비개수
+            num_c_equip = sheet_data["플레이어"][user_id].C급장비개수
+            num_b_equip = sheet_data["플레이어"][user_id].B급장비개수
             if int(num_b_equip) + int(num_c_equip) == 0:
                 reply_comment = "장비가 없습니다. 인벤토리를 확인해주세요."
             else:
                 sell_total = 5000 * int(num_b_equip) + 1000 * int(num_c_equip)
-                sheet_data["플레이어"][user_name].골드 += sell_total
-                sheet_data["플레이어"][user_name].C급장비개수 = 0
-                sheet_data["플레이어"][user_name].B급장비개수 = 0
+                sheet_data["플레이어"][user_id].골드 += sell_total
+                sheet_data["플레이어"][user_id].C급장비개수 = 0
+                sheet_data["플레이어"][user_id].B급장비개수 = 0
                 self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
                 reply_comment = "@%s" % user_id + f"[장비판매]\nB급장비개수: {num_b_equip}\nC급장비개수: {num_c_equip}\n총가격: {str(sell_total)}"
+
+        ##### 새로운 기능을 추가하길 바랄 경우 여기에 elif 구문으로 코드를 추가하세요 #####
 
         else:
             reply_comment = "@%s" % user_id + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다."

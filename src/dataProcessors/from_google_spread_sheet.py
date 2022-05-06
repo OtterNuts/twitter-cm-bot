@@ -6,6 +6,7 @@ from src.dataProcessors.models.user import User
 from src.auth.google_drive import GoogleClient
 
 logger = logging.Logger
+SHEET_NAME = "bot-data-example"
 
 class GoogleAPI:
     def __init__(self):
@@ -29,7 +30,7 @@ class GoogleAPI:
                 user_data.append(data)
             user_data_list.append(user_data)
 
-        columns = ["이름", "크리스탈", "스테미나", "떡밥", "B급장비개수", "C급장비개수", "골드"]
+        columns = ["아이디", "닉네임", "크리스탈", "스테미나", "떡밥", "B급장비개수", "C급장비개수", "골드"]
         user_data_dataframe = pandas.DataFrame(user_data_list, columns=columns)
         google_sheet = self.client.open(spread_name)
         sheet = google_sheet.worksheet(sheet_name)
@@ -46,17 +47,17 @@ class DataProcessingService:
     def generate_sheet_data(self):
         google_api = GoogleAPI()
 
-        equipment_raw_data = google_api.get_all_data_from_sheet("bot-data", "장비뽑기")
+        equipment_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "장비뽑기")
         equipment_data = self.classify_equipment_by_grade(equipment_raw_data)
-        hunting_raw_data = google_api.get_all_data_from_sheet("bot-data", "사냥")
+        hunting_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "사냥")
         hunting_data = self.classify_monster_by_grade(hunting_raw_data)
-        fishing_raw_data = google_api.get_all_data_from_sheet("bot-data", "낚시")
+        fishing_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "낚시")
         fishing_data = self.classify_monster_by_grade(fishing_raw_data)
-        cooking_raw_data = google_api.get_all_data_from_sheet("bot-data", "요리")
+        cooking_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "요리")
         cooking_data = self.get_cooking_list(cooking_raw_data)
-        user_raw_data = google_api.get_all_data_from_sheet("플레이어", "test")
+        user_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
         user_data = self.get_user_data_dict(user_raw_data)
-        comment_raw_data = google_api.get_all_data_from_sheet("bot-data", "활동 랜덤 스크립트")
+        comment_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "활동 랜덤 스크립트")
         comment_data = self.get_comment_list(comment_raw_data)
 
         sheet_data = dict(
@@ -114,13 +115,14 @@ class DataProcessingService:
             user_data_dict.update(
                 {
                     data[0]: User(
-                        이름=data[0],
-                        크리스탈=data[1],
-                        스테미나=data[2],
-                        떡밥=data[3],
-                        B급장비개수=data[4],
-                        C급장비개수=data[5],
-                        골드=data[6]
+                        id=data[0],
+                        닉네임=data[1],
+                        크리스탈=data[2],
+                        스테미나=data[3],
+                        떡밥=data[4],
+                        B급장비개수=data[5],
+                        C급장비개수=data[6],
+                        골드=data[7]
                     )
                 }
             )
