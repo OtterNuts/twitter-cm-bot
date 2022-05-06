@@ -4,12 +4,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 logger = logging.getLogger()
 
-
 class GoogleClient:
     def __init__(self):
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         self.keyfile = ""
-
 
     def google_auth(self):
         # use credits to create a client to interact with the Google Drive API

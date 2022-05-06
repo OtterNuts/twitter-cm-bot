@@ -86,7 +86,6 @@ class TweetBot:
 
     def generate_reply(self, sheet_data, task_name: str, tweet: Tweet):
         user_id = tweet.user.screen_name
-        user_name = tweet.user.name
         reply_image = ""
 
         if task_name == "오늘의운세":
@@ -100,7 +99,7 @@ class TweetBot:
 
         elif task_name == "[요리]":
             print("요리 시작")
-            reply_comment = "@%s" % tweet.user.screen_name + self.activities.cooking(sheet_data["요리"], sheet_data["코멘트"]["요리 평가"])
+            reply_comment = "@%s" % user_id + self.activities.cooking(sheet_data["요리"], sheet_data["코멘트"]["요리 평가"])
 
         elif task_name == "[낚시]":
             print("낚시 시작")
