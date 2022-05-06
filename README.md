@@ -91,5 +91,4 @@ raw_data를 가공하여 sheet_data에 넘기세요.
 
 
 ## 외부 참고 링크
-https://velog.io/@ebecathouse
-
+https://velog.io/@otternut
