@@ -4,7 +4,7 @@ from collections import defaultdict, namedtuple
 from src.auth.google_drive import GoogleClient
 
 logger = logging.Logger
-SHEET_NAME = "bot-data"
+SHEET_NAME = "bot-data-example"
 
 class GoogleAPI:
     def __init__(self):
