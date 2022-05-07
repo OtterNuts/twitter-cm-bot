@@ -20,15 +20,12 @@ class GoogleAPI:
 
     def update_user_data(self, user_data_dict):
         user_data_list = []
-        columns = []
         for _, user_object in user_data_dict.items():
-            columns = user_object.keys()
             user_data_list.append([data for data in user_object.values()])
 
-        user_data_dataframe = pandas.DataFrame(user_data_list, columns=columns)
         google_sheet = self.client.open(SHEET_NAME)
         sheet = google_sheet.worksheet("플레이어 데이터")
-        sheet.update("A2", user_data_dataframe.values.tolist())
+        sheet.update("A2", user_data_list)
 
     def update_user_sheet_data_from_google(self, sheet_data: dict):
         user_raw_data = self.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")

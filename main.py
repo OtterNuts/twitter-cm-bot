@@ -1,9 +1,8 @@
 from src.auth.twitter import TwitterClient
-from src.auth.google_drive import GoogleClient
 import logging
 from src.dataProcessors.from_text_file import RWDataFromTextFile
 import time
-from src.dataProcessors.from_google_spread_sheet import GoogleAPI, DataProcessingService
+from src.dataProcessors.from_google_spread_sheet import DataProcessingService
 from src.tweetBot.update_tweet import TweetBot
 
 logger = logging.Logger
