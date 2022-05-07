@@ -89,6 +89,9 @@ example_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "시트이름"
 시트 데이터에 맞춰 src/dataProcessors/models/items에 dataclass를 추가하고 데이터를 가공할 함수를 생성하세요.
 raw_data를 가공하여 sheet_data에 넘기세요.
 
+## 사용된 이미지에 관해
+오픈소스 이미지들을 넣어두었습니다. 가챠 기능을 그대로 이용하실 경우 normal.png, special.png의 이미지는 커뮤 분위기에 맞는 이미지로 교체하시는 것을 추천드립니다.
+이외에 이미지를 넣을 경우 구글 스프레드시트의 이미지란에 이미지이름을 적어두시고 src/tweetBot/images 에 이미지를 첨부하면 됩니다.
 
 ## 외부 참고 링크
 https://velog.io/@otternut
