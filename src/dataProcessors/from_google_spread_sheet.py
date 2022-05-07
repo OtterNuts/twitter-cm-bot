@@ -4,7 +4,7 @@ from collections import defaultdict, namedtuple
 from src.auth.google_drive import GoogleClient
 
 logger = logging.Logger
-SHEET_NAME = "bot-data-example"
+SHEET_NAME = "bot-data"
 
 class GoogleAPI:
     def __init__(self):
@@ -22,12 +22,8 @@ class GoogleAPI:
         user_data_list = []
         columns = []
         for _, user_object in user_data_dict.items():
-            object_dict = user_object._asdict()
-            user_data = []
-            columns = object_dict.keys()
-            for _, data in object_dict.items():
-                user_data.append(data)
-            user_data_list.append(user_data)
+            columns = user_object.keys()
+            user_data_list.append([data for data in user_object.values()])
 
         user_data_dataframe = pandas.DataFrame(user_data_list, columns=columns)
         google_sheet = self.client.open(SHEET_NAME)

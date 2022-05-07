@@ -133,8 +133,8 @@ class TweetBot:
 
         elif task_name == "[일괄판매]":
             print("일괄판매 시작")
-            num_c_equip = sheet_data["플레이어"][user_id].C급장비개수
-            num_b_equip = sheet_data["플레이어"][user_id].B급장비개수
+            num_c_equip = sheet_data["플레이어"][user_id]["C급장비개수"]
+            num_b_equip = sheet_data["플레이어"][user_id]["B급장비개수"]
             if int(num_b_equip) + int(num_c_equip) == 0:
                 reply_comment = "장비가 없습니다. 인벤토리를 확인해주세요."
             else:
@@ -159,7 +159,7 @@ class TweetBot:
         user_id = tweet.user.screen_name
 
         print("가챠 시작")
-        user_crystal = sheet_data["플레이어"][user_id].크리스탈
+        user_crystal = sheet_data["플레이어"][user_id]["크리스탈"]
         if user_crystal >= REQUIRED_CRYSTAL:
             replies = [{"reply_image": gotcha_result["image_name"], "reply_comment": "@%s" % user_id}]
 
