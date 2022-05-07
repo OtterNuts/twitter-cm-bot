@@ -1,9 +1,8 @@
 import tweepy
 import logging
-import time
 from src.dataProcessors.from_text_file import RWDataFromTextFile
 from src.dataProcessors.from_google_spread_sheet import GoogleAPI
-from random import randint, sample
+from random import sample
 from src.tweetBot.models.tweet import Tweet
 from src.tweetBot.activities import Activities
 
@@ -39,9 +38,9 @@ class TweetBot:
                     if keyword in tweet.text.lower():
                         task_name = keyword
 
-                if tweet.user.name not in user_list:
+                if user_id not in user_list:
                     api.update_status(
-                        status="@%s " % user_id + "존재하지 않는 플레이어입니다. 유저이름을 확인해주세요.",
+                        status="@%s " % user_id + "존재하지 않는 플레이어입니다. 시트 정보를 다시 확인해주세요.",
                         in_reply_to_status_id=tweet.id,
                     )
                     continue
@@ -81,7 +80,10 @@ class TweetBot:
                 print(err, "에러가 발생했습니다. 오류 메시지를 확인하세요.")
                 RWDataFromTextFile().update_file(latest_id)
 
-        RWDataFromTextFile().update_file(latest_id)
+            # save updated data
+            self.google_api.update_user_data(sheet_data["플레이어"])
+            RWDataFromTextFile().update_file(latest_id)
+
         return latest_id
 
     def generate_reply(self, sheet_data, task_name: str, tweet: Tweet):
@@ -99,33 +101,35 @@ class TweetBot:
 
         elif task_name == "[요리]":
             print("요리 시작")
-            reply_comment = "@%s" % user_id + self.activities.cooking(sheet_data["요리"], sheet_data["코멘트"]["요리 평가"])
+            reply_comment = "@%s" % user_id + self.activities.cooking(sheet_data["요리"], sheet_data["코멘트"]["요리_평가"])
 
         elif task_name == "[낚시]":
             print("낚시 시작")
             user_bites = sheet_data["플레이어"][user_id].떡밥
-            fishing_comments = sheet_data["코멘트"]["낚시 멘트"]
+            fishing_comments = sheet_data["코멘트"]["낚시_멘트"]
             if user_bites >= REQUIRED_BITE:
                 fishing_result = self.activities.activity_result(sheet_data["낚시"], fishing_comments)
                 reply_image = fishing_result["image_name"]
                 reply_comment = "@%s" % user_id + fishing_result["comment"]
 
-                sheet_data["플레이어"][user_id].떡밥 = user_bites - REQUIRED_BITE
-                self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+                # update user data
+                new_user_data = sheet_data["플레이어"][user_id]._replace(떡밥=user_bites - REQUIRED_BITE)
+                sheet_data["플레이어"].update({user_id: new_user_data})
             else:
                 reply_comment = "@%s" % user_id + "떡밥이 부족하거나 없는 유저명입니다. 상점에서 떡밥 구입하세요."
 
         elif task_name == "[사냥]":
             print("사냥 시작")
             user_stamina = sheet_data["플레이어"][user_id].스테미나
-            hunting_comments = sheet_data["코멘트"]["사냥 멘트"]
+            hunting_comments = sheet_data["코멘트"]["사냥_멘트"]
             if user_stamina >= REQUIRED_STAMINA:
                 hunt_result = self.activities.activity_result(sheet_data["사냥"], hunting_comments)
                 reply_image = hunt_result["image_name"]
                 reply_comment = "@%s" % user_id + hunt_result["comment"]
 
-                sheet_data["플레이어"][user_id].스테미나 = user_stamina - REQUIRED_STAMINA
-                self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+                # update user data
+                new_user_data=sheet_data["플레이어"][user_id]._replace(스테미나=user_stamina - REQUIRED_STAMINA)
+                sheet_data["플레이어"].update({user_id: new_user_data})
             else:
                 reply_comment = "@%s" % user_id + "스테미나가 부족하거나 없는 유저명입니다. 상점에서 회복약을 구입하거나 스테미나가 회복될 때까지 기다려주세요."
 
@@ -133,15 +137,18 @@ class TweetBot:
             print("일괄판매 시작")
             num_c_equip = sheet_data["플레이어"][user_id].C급장비개수
             num_b_equip = sheet_data["플레이어"][user_id].B급장비개수
+            user_gold = sheet_data["플레이어"][user_id].골드
             if int(num_b_equip) + int(num_c_equip) == 0:
                 reply_comment = "장비가 없습니다. 인벤토리를 확인해주세요."
             else:
                 sell_total = 5000 * int(num_b_equip) + 1000 * int(num_c_equip)
-                sheet_data["플레이어"][user_id].골드 += sell_total
-                sheet_data["플레이어"][user_id].C급장비개수 = 0
-                sheet_data["플레이어"][user_id].B급장비개수 = 0
-                self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
                 reply_comment = "@%s" % user_id + f"[장비판매]\nB급장비개수: {num_b_equip}\nC급장비개수: {num_c_equip}\n총가격: {str(sell_total)}"
+
+                # update user data
+                new_user_data = sheet_data["플레이어"][user_id]._replace(골드=sell_total + user_gold)
+                new_user_data = new_user_data["플레이어"][user_id]._replace(C급장비개수=0)
+                new_user_data = new_user_data["플레이어"][user_id]._replace(B급장비개수=0)
+                sheet_data["플레이어"].update({user_id: new_user_data})
 
         ##### 새로운 기능을 추가하길 바랄 경우 여기에 elif 구문으로 코드를 추가하세요 #####
 
@@ -153,10 +160,9 @@ class TweetBot:
     def generate_gotcha_comment(self, sheet_data, tweet: Tweet):
         gotcha_result = self.activities.gotcha_result(sheet_data["장비"])
         user_id = tweet.user.screen_name
-        user_name = tweet.user.name
 
         print("가챠 시작")
-        user_crystal = sheet_data["플레이어"][user_name].크리스탈
+        user_crystal = sheet_data["플레이어"][user_id].크리스탈
         if user_crystal >= REQUIRED_CRYSTAL:
             replies = [{"reply_image": gotcha_result["image_name"], "reply_comment": "@%s" % user_id}]
 
@@ -183,10 +189,11 @@ class TweetBot:
             num_c_equip = len(gotcha_result["equip_list"]["C급"])
             num_b_equip = len(gotcha_result["equip_list"]["B급"])
 
-            sheet_data["플레이어"][user_name].크리스탈 -= REQUIRED_CRYSTAL
-            sheet_data["플레이어"][user_name].C급장비개수 += num_c_equip
-            sheet_data["플레이어"][user_name].B급장비개수 += num_b_equip
-            self.google_api.update_user_data("플레이어", "test", sheet_data["플레이어"])
+            # update user data
+            new_user_data = sheet_data["플레이어"][user_id]._replace(크리스탈=user_crystal-REQUIRED_CRYSTAL)
+            new_user_data = new_user_data._replace(C급장비개수=int(sheet_data["플레이어"][user_id].C급장비개수)+num_c_equip)
+            new_user_data = new_user_data._replace(B급장비개수=int(sheet_data["플레이어"][user_id].B급장비개수)+num_b_equip)
+            sheet_data["플레이어"].update({user_id: new_user_data})
 
         else:
             reply_comment = "@%s" % user_id + "크리스탈 부족하거나 없는 유저명입니다. 상점에서 크리스탈을 구매해주세요."

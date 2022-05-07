@@ -28,8 +28,8 @@ class Activities:
         return f"[{dish.음식명}]\n들어간 재료: {dish.들어간_재료}\n{dish.음식_설명}\n\n한줄평: {result_comment}"
 
     def generate_comment(self, activity_comment: str, monster):
-        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.희귀도}]{monster.이름}\n{monster.아이템_설명}\n\n"
-        if monster.recipe:
+        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.등급}]{monster.이름}\n{monster.아이템_설명}\n\n"
+        if monster.추천_레시피:
             result_comment += f"추천 레시피: {monster.추천_레시피}"
 
         return result_comment
@@ -52,7 +52,7 @@ class Activities:
 
         result_monster = monster_list[randint(0, len(monster_list) - 1)]
         comment = self.generate_comment(activity_comment, result_monster)
-        image_name = result_monster.image
+        image_name = result_monster.이미지
 
         return {"image_name": image_name, "comment": comment}
 
