@@ -1,6 +1,6 @@
 import logging
 import pandas
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from src.dataProcessors.models.items import Monster, Cooking, Equipment
 from src.dataProcessors.models.user import User
 from src.auth.google_drive import GoogleClient
@@ -17,12 +17,12 @@ class GoogleAPI:
         # Extract and print all of the values
         sheet = google_sheet.worksheet(sheet_name)
         data = sheet.get_all_records()
-        dataframe = pandas.DataFrame.from_dict(data)
+        raw_data = pandas.DataFrame.from_dict(data)
 
-        return dataframe
+        return raw_data
 
     def update_user_data(self, spread_name, sheet_name, user_data_dict):
-        user_data_list = []
+        user_data_list = list(dict())
         for _, user_object in user_data_dict.items():
             object_dict = user_object.__dict__
             user_data = []
@@ -30,7 +30,7 @@ class GoogleAPI:
                 user_data.append(data)
             user_data_list.append(user_data)
 
-        columns = ["아이디", "닉네임", "크리스탈", "스테미나", "떡밥", "B급장비개수", "C급장비개수", "골드"]
+        columns = user_data_list[0].keys()
         user_data_dataframe = pandas.DataFrame(user_data_list, columns=columns)
         google_sheet = self.client.open(spread_name)
         sheet = google_sheet.worksheet(sheet_name)
@@ -48,11 +48,11 @@ class DataProcessingService:
         google_api = GoogleAPI()
 
         equipment_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "장비뽑기")
-        equipment_data = self.classify_equipment_by_grade(equipment_raw_data)
+        equipment_data = self.classify_items_by_grade(equipment_raw_data)
         hunting_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "사냥")
-        hunting_data = self.classify_monster_by_grade(hunting_raw_data)
+        hunting_data = self.classify_items_by_grade(hunting_raw_data)
         fishing_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "낚시")
-        fishing_data = self.classify_monster_by_grade(fishing_raw_data)
+        fishing_data = self.classify_items_by_grade(fishing_raw_data)
         cooking_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "요리")
         cooking_data = self.get_cooking_list(cooking_raw_data)
         user_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
@@ -70,18 +70,20 @@ class DataProcessingService:
         )
         return sheet_data
 
-    def classify_equipment_by_grade(self, dataframe):
+    def classify_items_by_grade(self, raw_data):
         classified_data = defaultdict(list)
 
-        for equipment_data in dataframe.values:
-            classified_data[equipment_data[1]].append(
-                Equipment(
-                    name=equipment_data[0],
-                    grade=equipment_data[1],
-                    image=equipment_data[2],
-                    description=equipment_data[3],
-                )
-            )
+        for data_dict in raw_data:
+            item = namedtuple("Item", data_dict.keys())(*data_dict.values())
+            classified_data[item.grade].append(item)
+        return classified_data
+
+    def classify_equipment_by_grade(self, raw_data):
+        classified_data = defaultdict(list)
+
+        for equipment_dict in raw_data:
+            equipment = namedtuple("Equipment", equipment_dict.keys())(*equipment_dict.values())
+            classified_data[equipment.grade].append(equipment)
         return classified_data
 
     def classify_monster_by_grade(self, dataframe):
@@ -101,48 +103,34 @@ class DataProcessingService:
 
     def get_cooking_list(self, dataframe):
         cooking_list = []
-        for data in dataframe.values:
-            cooking_list.append(Cooking(
-                name=data[0],
-                description=data[1],
-                ingredients=data[2]
-            ))
+        for data_dict in dataframe.values:
+            cooking = namedtuple("Item", data_dict.keys())(*data_dict.values())
+            cooking_list.append(cooking)
         return cooking_list
 
-    def get_user_data_dict(self, dataframe):
+    def get_user_data_dict(self, raw_data):
         user_data_dict = {}
-        for data in dataframe.values:
+        for data_dict in raw_data:
+            user = namedtuple("Item", data_dict.keys())(*data_dict.values())
             user_data_dict.update(
-                {
-                    data[0]: User(
-                        id=data[0],
-                        닉네임=data[1],
-                        크리스탈=data[2],
-                        스테미나=data[3],
-                        떡밥=data[4],
-                        B급장비개수=data[5],
-                        C급장비개수=data[6],
-                        골드=data[7]
-                    )
-                }
+                {user.아이디: user}
             )
-
         return user_data_dict
 
-    def get_comment_list(self, dataframe):
+    def get_comment_list(self, raw_data):
         comment_dict = {
-            "사냥 멘트": [],
-            "낚시 멘트": [],
-            "요리 평가": [],
+            "사냥_멘트": [],
+            "낚시_멘트": [],
+            "요리_평가": [],
         }
-        for data in dataframe.values:
-            comment_dict["사냥 멘트"].append(data[0])
-            comment_dict["낚시 멘트"].append(data[1])
-            comment_dict["요리 평가"].append(data[2])
+        for data in raw_data:
+            comment_dict["사냥_멘트"].append(data["사냥_멘트"])
+            comment_dict["낚시_멘트"].append(data["낚시_멘트"])
+            comment_dict["요리_평가"].append(data["요리_평가"])
 
-        comment_dict["사냥 멘트"] = list(filter(None, comment_dict["사냥 멘트"]))
-        comment_dict["낚시 멘트"] = list(filter(None, comment_dict["낚시 멘트"]))
-        comment_dict["요리 평가"] = list(filter(None, comment_dict["요리 평가"]))
+        comment_dict["사냥_멘트"] = list(filter(None, comment_dict["사냥_멘트"]))
+        comment_dict["낚시_멘트"] = list(filter(None, comment_dict["낚시_멘트"]))
+        comment_dict["요리_평가"] = list(filter(None, comment_dict["요리_평가"]))
 
         return comment_dict
 

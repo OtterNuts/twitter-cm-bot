@@ -25,12 +25,12 @@ class Activities:
         value = randint(0, len(cooking_data) - 1)
         dish = cooking_data[value]
         result_comment = comment_list[randint(0, len(comment_list) - 1)]
-        return f"[{dish.name}]\n들어간 재료: {dish.ingredients}\n{dish.description}\n\n한줄평: {result_comment}"
+        return f"[{dish.음식명}]\n들어간 재료: {dish.들어간_재료}\n{dish.음식_설명}\n\n한줄평: {result_comment}"
 
-    def generate_comment(self, activity_comment: str, monster: Monster):
-        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.grade}]{monster.name}\n{monster.description}\n\n"
+    def generate_comment(self, activity_comment: str, monster):
+        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.희귀도}]{monster.이름}\n{monster.아이템_설명}\n\n"
         if monster.recipe:
-            result_comment += f"추천 레시피: {monster.recipe}"
+            result_comment += f"추천 레시피: {monster.추천_레시피}"
 
         return result_comment
 
@@ -77,13 +77,13 @@ class Activities:
                 equip_grade = "C급"
                 equipment_list = equipment_data[equip_grade]
 
-            equipment = equipment_list[randint(0,len(equipment_list) - 1)]
+            equipment = equipment_list[randint(0, len(equipment_list) - 1)]
             result[equip_grade].append(
                 Equipment(
-                    name=equipment.name,
-                    grade=equipment.grade,
-                    image=equipment.image,
-                    description=equipment.description,
+                    name=equipment.장비명,
+                    grade=equipment.등급,
+                    image=equipment.이미지,
+                    description=equipment.설명,
                 )
             )
 
