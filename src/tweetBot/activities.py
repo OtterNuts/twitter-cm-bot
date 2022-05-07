@@ -1,5 +1,4 @@
 from random import randint
-from src.dataProcessors.models.items import Monster, Equipment
 from collections import defaultdict
 
 class Activities:
@@ -25,12 +24,12 @@ class Activities:
         value = randint(0, len(cooking_data) - 1)
         dish = cooking_data[value]
         result_comment = comment_list[randint(0, len(comment_list) - 1)]
-        return f"[{dish.음식명}]\n들어간 재료: {dish.들어간_재료}\n{dish.음식_설명}\n\n한줄평: {result_comment}"
+        return f'[{dish["음식명"]}]\n들어간 재료: {dish["들어간_재료"]}\n{dish["음식_설명"]}\n\n한줄평: {result_comment}'
 
     def generate_comment(self, activity_comment: str, monster):
-        result_comment = f"{activity_comment}\n . \n . \n . \n [{monster.등급}]{monster.이름}\n{monster.아이템_설명}\n\n"
+        result_comment = f'{activity_comment}\n . \n . \n . \n [{monster["등급"]}]{monster["이름"]}\n{monster["아이템_설명"]}\n\n'
         if monster.추천_레시피:
-            result_comment += f"추천 레시피: {monster.추천_레시피}"
+            result_comment += f'추천 레시피: {monster["추천_레시피"]}'
 
         return result_comment
 
@@ -78,14 +77,7 @@ class Activities:
                 equipment_list = equipment_data[equip_grade]
 
             equipment = equipment_list[randint(0, len(equipment_list) - 1)]
-            result[equip_grade].append(
-                Equipment(
-                    name=equipment.장비명,
-                    grade=equipment.등급,
-                    image=equipment.이미지,
-                    description=equipment.설명,
-                )
-            )
+            result[equip_grade].append(equipment)
 
         return {"image_name": image_name, "equip_list": result}
 

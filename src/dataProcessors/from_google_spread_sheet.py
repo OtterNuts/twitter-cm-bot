@@ -52,12 +52,13 @@ class DataProcessingService:
         fishing_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "낚시")
         fishing_data = self.classify_items_by_grade(fishing_raw_data)
 
-        cooking_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "요리")
-        cooking_data = self.get_cooking_list(cooking_raw_data)
+        cooking_data = google_api.get_all_data_from_sheet(SHEET_NAME, "요리")
         user_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
         user_data = self.get_user_data_dict(user_raw_data)
         comment_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "활동 랜덤 스크립트")
         comment_data = self.get_comment_list(comment_raw_data)
+
+        #### 새로운 시트를 추가할 경우 이 아래에 넣어주세요 ####
 
         sheet_data = dict(
             장비=equipment_data,
@@ -67,29 +68,23 @@ class DataProcessingService:
             플레이어=user_data,
             코멘트=comment_data
         )
+
+        #### 새로운 시트 데이터를 추가한 경우 위의 sheet_data에도 데이터를 추가해주세요. ####
+
         return sheet_data
 
     def classify_items_by_grade(self, raw_data):
         classified_data = defaultdict(list)
 
-        for data_dict in raw_data:
-            item = namedtuple("Item", data_dict.keys())(*data_dict.values())
-            classified_data[item.등급].append(item)
+        for item in raw_data:
+            classified_data[item["등급"]].append(item)
         return classified_data
-
-    def get_cooking_list(self, raw_data):
-        cooking_list = []
-        for data_dict in raw_data:
-            cooking = namedtuple("Item", data_dict.keys())(*data_dict.values())
-            cooking_list.append(cooking)
-        return cooking_list
 
     def get_user_data_dict(self, raw_data):
         user_data_dict = {}
-        for data_dict in raw_data:
-            user = namedtuple("Item", data_dict.keys())(*data_dict.values())
+        for user in raw_data:
             user_data_dict.update(
-                {user.id: user}
+                {user["id"]: user}
             )
         return user_data_dict
 
