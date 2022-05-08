@@ -1,5 +1,6 @@
 import tweepy
 import logging
+import time
 from src.dataProcessors.from_text_file import RWDataFromTextFile
 from src.dataProcessors.from_google_spread_sheet import GoogleAPI
 from random import sample
@@ -27,8 +28,8 @@ class TweetBot:
             new_tweet = Tweet(id=tweet.id, user=tweet.user, text=tweet.text)
             received_tweets.append(new_tweet)
 
+        self.google_api.update_user_sheet_data_from_google(sheet_data)
         for tweet in reversed(received_tweets):
-            self.google_api.update_user_sheet_data_from_google(sheet_data)
             try:
                 latest_id = tweet.id
                 user_id = tweet.user.screen_name
@@ -71,19 +72,20 @@ class TweetBot:
                             status=reply["reply_comment"],
                             in_reply_to_status_id=tweet.id,
                         )
+                time.sleep(3)
 
             except tweepy.errors.TweepyException as err:
                 api.update_status(
-                    status="@%s" % tweet.user.id + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다.",
+                    status="@%s" % tweet.user.screen_name + "봇 오류입니다. 캡쳐와 함께 총괄계에 문의 부탁드립니다.",
                     in_reply_to_status_id=tweet.id,
                 )
                 print(err, "에러가 발생했습니다. 오류 메시지를 확인하세요.")
                 RWDataFromTextFile().update_file(latest_id)
 
             # save updated data
-            self.google_api.update_user_data(sheet_data["플레이어"])
             RWDataFromTextFile().update_file(latest_id)
 
+        self.google_api.update_user_data(sheet_data["플레이어"])
         return latest_id
 
     def generate_reply(self, sheet_data, task_name: str, tweet: Tweet):
