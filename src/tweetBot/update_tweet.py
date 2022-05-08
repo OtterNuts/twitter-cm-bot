@@ -178,7 +178,7 @@ class TweetBot:
             for s_equip in gotcha_result["equip_list"]["S급"]:
                 replies.append(
                     {
-                        "reply_image": s_equip.image,
+                        "reply_image": s_equip["이미지"],
                         "reply_comment": "@%s" % user_id + f'[{s_equip["등급"]}]{s_equip["장비명"]}: {s_equip["설명"]}\n'
                     }
                 )
