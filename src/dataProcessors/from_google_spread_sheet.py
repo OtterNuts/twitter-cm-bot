@@ -1,4 +1,7 @@
 import logging
+import time
+
+import gspread.exceptions
 import pandas
 from collections import defaultdict, namedtuple
 from src.auth.google_drive import GoogleClient
@@ -12,9 +15,16 @@ class GoogleAPI:
 
     def get_all_data_from_sheet(self, spread_name, sheet_name):
         google_sheet = self.client.open(spread_name)
-        # Extract and print all of the values
-        sheet = google_sheet.worksheet(sheet_name)
-        raw_data = sheet.get_all_records()
+
+        try:
+            # Extract and print all of the values
+            sheet = google_sheet.worksheet(sheet_name)
+            raw_data = sheet.get_all_records()
+
+        except gspread.exceptions.APIError as error:
+            print(error)
+            time.sleep(30)
+            raw_data = self.get_all_data_from_sheet(self, spread_name, sheet_name)
 
         return raw_data
 
@@ -23,15 +33,27 @@ class GoogleAPI:
         for _, user_object in user_data_dict.items():
             user_data_list.append([data for data in user_object.values()])
 
-        google_sheet = self.client.open(SHEET_NAME)
-        sheet = google_sheet.worksheet("플레이어 데이터")
-        sheet.update("A2", user_data_list)
+        try:
+            google_sheet = self.client.open(SHEET_NAME)
+            sheet = google_sheet.worksheet("플레이어 데이터")
+            sheet.update("A2", user_data_list)
+
+        except gspread.exceptions.APIError as error:
+            print(error)
+            time.sleep(30)
+            self.update_user_data(user_data_dict)
 
     def update_user_sheet_data_from_google(self, sheet_data: dict):
-        user_raw_data = self.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
-        user_data = DataProcessingService().get_user_data_dict(user_raw_data)
 
-        sheet_data.update({"플레이어": user_data})
+        try:
+            user_raw_data = self.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
+            user_data = DataProcessingService().get_user_data_dict(user_raw_data)
+            sheet_data.update({"플레이어": user_data})
+
+        except gspread.exceptions.APIError as error:
+            print(error)
+            time.sleep(30)
+            self.update_user_sheet_data_from_google(sheet_data)
 
 
 class DataProcessingService:
@@ -46,8 +68,6 @@ class DataProcessingService:
         fishing_data = self.classify_items_by_grade(fishing_raw_data)
 
         cooking_data = google_api.get_all_data_from_sheet(SHEET_NAME, "요리")
-        user_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "플레이어 데이터")
-        user_data = self.get_user_data_dict(user_raw_data)
         comment_raw_data = google_api.get_all_data_from_sheet(SHEET_NAME, "활동 랜덤 스크립트")
         comment_data = self.get_comment_list(comment_raw_data)
 
