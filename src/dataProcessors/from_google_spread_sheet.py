@@ -78,7 +78,6 @@ class DataProcessingService:
             사냥=hunting_data,
             낚시=fishing_data,
             요리=cooking_data,
-            플레이어=user_data,
             코멘트=comment_data
         )
 
